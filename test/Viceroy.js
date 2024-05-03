@@ -40,7 +40,7 @@ describe("Viceroy", async function () {
 
   // prettier-ignore;
   it("conduct your attack here", async function () {
-    await attacker.attack(governance);
+    await attacker.attack(governance.address);
   });
 
   after(async function () {
